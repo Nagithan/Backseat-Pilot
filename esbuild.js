@@ -1,4 +1,7 @@
 const esbuild = require("esbuild");
+const fs = require("fs");
+const path = require("path");
+
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -21,6 +24,32 @@ const esbuildProblemMatcherPlugin = {
 			console.log('[watch] build finished');
 		});
 	},
+};
+
+const copyAssets = () => {
+	const outDir = path.join(__dirname, "dist");
+	if (!fs.existsSync(outDir)) {
+		fs.mkdirSync(outDir, { recursive: true });
+	}
+
+	// Copy Styles
+	fs.copyFileSync(
+		path.join(__dirname, "src", "webview", "ui", "styles.css"),
+		path.join(outDir, "styles.css")
+	);
+
+	// Copy Codicons
+	const codiconsDir = path.join(__dirname, "node_modules", "@vscode", "codicons", "dist");
+	fs.copyFileSync(
+		path.join(codiconsDir, "codicon.css"),
+		path.join(outDir, "codicon.css")
+	);
+	fs.copyFileSync(
+		path.join(codiconsDir, "codicon.ttf"),
+		path.join(outDir, "codicon.ttf")
+	);
+	
+	console.log("✅ Assets copied to dist/");
 };
 
 async function main() {
@@ -70,6 +99,9 @@ async function main() {
 		await webviewCtx.rebuild();
 		await webviewCtx.dispose();
 	}
+
+	// Copy assets after build
+	copyAssets();
 }
 
 main().catch(e => {

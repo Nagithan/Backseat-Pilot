@@ -79,8 +79,7 @@ export class BackseatPilotViewProvider implements vscode.WebviewViewProvider, IW
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                this._extensionUri,
-                vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'codicons', 'dist')
+                this._extensionUri
             ],
         };
 
