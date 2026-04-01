@@ -39,7 +39,7 @@ Get the best results from LLMs with expert-curated templates:
 ## 🔧 How to install
 
 ### Installation from .vsix file
-1. Download the latest .vsix file from the [releases](https://github.com/nathan-mouret/backseat-pilot/releases) page.
+1. Download the latest .vsix file from the [releases](https://github.com/Nagithan/Backseat-Pilot/releases) page.
 2. Open VS Code (or Google Antigravity).
 3. Navigate to the extensions panel.
 4. Click on the "..." button in the top-right corner of the Extensions panel.
