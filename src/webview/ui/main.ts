@@ -153,7 +153,7 @@ class LLMBabysitterUI {
         const text = state.prePrompt + state.instruction + state.postPrompt;
         this.ipc.postMessage({ 
             type: IpcMessageId.GET_TOKENS, 
-            payload: { text, selectedFiles: state.selectedFiles }
+            payload: { text }
         });
     }
 

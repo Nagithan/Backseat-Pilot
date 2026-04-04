@@ -45,7 +45,7 @@ export type WebviewMessage =
   | { type: IpcMessageId.COPY_TO_CLIPBOARD; payload: { prePrompt: string; instruction: string; postPrompt: string; selectedFiles: string[] } }
   | { type: IpcMessageId.UPDATE_SELECTION; payload: string[] }
   | { type: IpcMessageId.UPDATE_TEXT; payload: { type: 'prePrompt' | 'instruction' | 'postPrompt'; text: string } }
-  | { type: IpcMessageId.GET_TOKENS; payload: { text: string; selectedFiles: string[] } }
+  | { type: IpcMessageId.GET_TOKENS; payload: { text: string; selectedFiles?: string[] } }
   | { type: IpcMessageId.COPY_TO_CLIPBOARD_RAW; payload: string }
   | { type: IpcMessageId.EXPAND_FOLDER; payload: string }
   | { type: IpcMessageId.MANAGE_PRESET; payload: { id: string; type: 'prePrompt' | 'instruction' | 'postPrompt'; currentText: string } }

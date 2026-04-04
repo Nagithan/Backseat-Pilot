@@ -12,14 +12,15 @@ describe('GetTokensHandler Unit Tests', () => {
     beforeEach(async () => {
         await TestUtils.fullReset();
         mockWebview = {
-            postMessage: vi.fn()
+            postMessage: vi.fn(),
+            saveSelection: vi.fn()
         };
         handler = new GetTokensHandler(mockWebview);
     });
 
-    it('should calculate total tokens correctly for prompt and selected files', async () => {
-        const text = 'Instructions';
+    it('should calculate file tokens on UPDATE_SELECTION and use them in GET_TOKENS', async () => {
         const selectedFiles = ['file1.js', 'file2.js'];
+        const text = 'Instructions';
 
         vi.spyOn(PromptGenerator, 'estimateTokens').mockImplementation((input) => {
             if (input === 'Instructions') { return 10; }
@@ -34,27 +35,72 @@ describe('GetTokensHandler Unit Tests', () => {
             return '';
         });
 
+        // 1. Update Selection
+        await handler.execute({
+            type: IpcMessageId.UPDATE_SELECTION,
+            payload: selectedFiles
+        });
+
+        expect(mockWebview.saveSelection).toHaveBeenCalledWith(selectedFiles);
+
+        // 2. Get Tokens (should use cached file tokens)
         await handler.execute({
             type: IpcMessageId.GET_TOKENS,
-            payload: { text, selectedFiles }
+            payload: { text }
         });
 
         expect(mockWebview.postMessage).toHaveBeenCalledWith({
             type: 'tokenUpdate',
             payload: {
-                total: 60, // 10 + 20 + 30
+                total: 60, // 10 (text) + 50 (cached files)
                 prompts: 10,
                 files: 50
             }
         });
     });
 
-    it('should handle unreadable files by skipping them', async () => {
-        const text = 'Instructions';
-        const selectedFiles = ['readable.js', 'missing.js'];
+    it('should skip file tokens for strings starting with "[" (error/skip markers)', async () => {
+        const selectedFiles = ['error.js', 'large.js', 'valid.js'];
+        const text = '';
 
         vi.spyOn(PromptGenerator, 'estimateTokens').mockImplementation((input) => {
-            if (input === 'Instructions') { return 10; }
+            if (input === 'valid content') { return 100; }
+            if (input === '') { return 0; }
+            return 5; // Should be ignored for error strings
+        });
+
+        vi.spyOn(FileManager, 'getFileContent').mockImplementation(async (path) => {
+            if (path === 'error.js') { return '[Error reading file]'; }
+            if (path === 'large.js') { return '[File too large]'; }
+            if (path === 'valid.js') { return 'valid content'; }
+            return '';
+        });
+
+        await handler.execute({
+            type: IpcMessageId.UPDATE_SELECTION,
+            payload: selectedFiles
+        });
+
+        await handler.execute({
+            type: IpcMessageId.GET_TOKENS,
+            payload: { text }
+        });
+
+        expect(mockWebview.postMessage).toHaveBeenCalledWith({
+            type: 'tokenUpdate',
+            payload: {
+                total: 100, // Only valid.js content
+                prompts: 0,
+                files: 100
+            }
+        });
+    });
+
+    it('should handle unreadable files by skipping them during recalculation', async () => {
+        const selectedFiles = ['readable.js', 'missing.js'];
+        const text = '';
+
+        vi.spyOn(PromptGenerator, 'estimateTokens').mockImplementation((input) => {
             if (input === 'content') { return 20; }
             return 0;
         });
@@ -65,23 +111,28 @@ describe('GetTokensHandler Unit Tests', () => {
         });
 
         await handler.execute({
+            type: IpcMessageId.UPDATE_SELECTION,
+            payload: selectedFiles
+        });
+
+        await handler.execute({
             type: IpcMessageId.GET_TOKENS,
-            payload: { text, selectedFiles }
+            payload: { text }
         });
 
         expect(mockWebview.postMessage).toHaveBeenCalledWith({
             type: 'tokenUpdate',
             payload: {
-                total: 30, // 10 + 20
-                prompts: 10,
+                total: 20,
+                prompts: 0,
                 files: 20
             }
         });
     });
 
-    it('should ignore non-GET_TOKENS messages', async () => {
+    it('should ignore non-supported messages', async () => {
         await (handler as any).execute({
-            type: IpcMessageId.READY,
+            type: IpcMessageId.MANAGE_PRESET,
             payload: {}
         });
 

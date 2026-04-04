@@ -12,7 +12,6 @@ import { WebviewHtmlFactory } from './WebviewHtmlFactory.js';
 import { ReadyHandler } from '../ipc/handlers/ReadyHandler.js';
 import { SavePresetHandler } from '../ipc/handlers/SavePresetHandler.js';
 import { DeletePresetHandler } from '../ipc/handlers/DeletePresetHandler.js';
-import { UpdateSelectionHandler } from '../ipc/handlers/UpdateSelectionHandler.js';
 import { CopyToClipboardHandler } from '../ipc/handlers/CopyToClipboardHandler.js';
 import { GetTokensHandler } from '../ipc/handlers/GetTokensHandler.js';
 import { ExpandFolderHandler } from '../ipc/handlers/ExpandFolderHandler.js';
@@ -32,6 +31,7 @@ export class LLMBabysitterViewProvider implements vscode.WebviewViewProvider, IW
     private _view?: vscode.WebviewView;
     private presetManager: PresetManager;
     private ipcRouter: IpcMessageRouter;
+    private getTokensHandler?: GetTokensHandler;
     private logger = Logger.getInstance();
 
     constructor(
@@ -47,12 +47,14 @@ export class LLMBabysitterViewProvider implements vscode.WebviewViewProvider, IW
      * Bootstraps the IPC handler registry.
      */
     private initializeHandlers(): void {
+        this.getTokensHandler = new GetTokensHandler(this);
+        
         this.ipcRouter.register(IpcMessageId.READY, new ReadyHandler(this));
         this.ipcRouter.register(IpcMessageId.SAVE_PRESET, new SavePresetHandler(this, this.presetManager));
         this.ipcRouter.register(IpcMessageId.DELETE_PRESET, new DeletePresetHandler(this, this.presetManager));
-        this.ipcRouter.register(IpcMessageId.UPDATE_SELECTION, new UpdateSelectionHandler(this));
+        this.ipcRouter.register(IpcMessageId.UPDATE_SELECTION, this.getTokensHandler);
         this.ipcRouter.register(IpcMessageId.COPY_TO_CLIPBOARD, new CopyToClipboardHandler(this));
-        this.ipcRouter.register(IpcMessageId.GET_TOKENS, new GetTokensHandler(this));
+        this.ipcRouter.register(IpcMessageId.GET_TOKENS, this.getTokensHandler);
         this.ipcRouter.register(IpcMessageId.EXPAND_FOLDER, new ExpandFolderHandler(this));
         this.ipcRouter.register(IpcMessageId.COPY_TO_CLIPBOARD_RAW, new CopyToClipboardRawHandler(this));
         this.ipcRouter.register(IpcMessageId.MANAGE_PRESET, new ManagePresetHandler(this, this.presetManager));
@@ -136,6 +138,11 @@ export class LLMBabysitterViewProvider implements vscode.WebviewViewProvider, IW
         };
 
         this._view.webview.postMessage({ type: 'initState', payload: state });
+
+        // Initial token calculation (Wait for webview READY)
+        if (selectedFiles.length > 0) {
+            this.getTokensHandler?.recalculateFileTokens(selectedFiles);
+        }
     }
 
     /**
