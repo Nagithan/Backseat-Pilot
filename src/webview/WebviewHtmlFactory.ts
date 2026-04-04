@@ -24,7 +24,7 @@ export class WebviewHtmlFactory {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
                 <link href="${codiconsUri}" rel="stylesheet">
                 <link href="${styleUri}" rel="stylesheet">
                 <title>LLM Babysitter</title>
@@ -34,17 +34,17 @@ export class WebviewHtmlFactory {
                     <section class="form-section">
                         <div class="section-title-container">
                             <h3 id="label-prePrompt">Pre-prompt (Intro)</h3>
-                            <button class="icon-btn" id="help-prePrompt" title="Set the persona, background context, or overall goal for the AI (e.g., 'Act as a Senior Python Expert').">
+                            <button class="icon-btn" id="help-prePrompt" data-tooltip="Set the persona, background context, or overall goal for the AI (e.g., 'Act as a Senior Python Expert')." aria-label="Help: Pre-prompt explanation">
                                 <span class="codicon codicon-question"></span>
                             </button>
                         </div>
                         <div class="header-with-actions">
                             <div class="favorites-list" id="favorites-prePrompt"></div>
                             <div class="favorite-actions">
-                                <button class="icon-btn" id="save-prePrompt" title="Save as Favorite">
+                                <button class="icon-btn" id="save-prePrompt" data-tooltip="Save as Favorite" aria-label="Save as Favorite">
                                     <span class="codicon codicon-heart"></span>
                                 </button>
-                                <button class="icon-btn" id="manage-prePrompt" title="Manage Favorite">
+                                <button class="icon-btn" id="manage-prePrompt" data-tooltip="Manage Favorite" aria-label="Manage Favorite">
                                     <span class="codicon codicon-ellipsis"></span>
                                 </button>
                             </div>
@@ -57,17 +57,17 @@ export class WebviewHtmlFactory {
                     <section class="form-section">
                         <div class="section-title-container">
                             <h3 id="label-instruction">Main Instruction</h3>
-                            <button class="icon-btn" id="help-instruction" title="Provide the specific task or question you want the AI to execute using the selected workspace files.">
+                            <button class="icon-btn" id="help-instruction" data-tooltip="Provide the specific task or question you want the AI to execute using the selected workspace files." aria-label="Help: Instruction explanation">
                                 <span class="codicon codicon-question"></span>
                             </button>
                         </div>
                         <div class="header-with-actions">
                             <div class="favorites-list" id="favorites-instruction"></div>
                             <div class="favorite-actions">
-                                <button class="icon-btn" id="save-instruction" title="Save as Favorite">
+                                <button class="icon-btn" id="save-instruction" data-tooltip="Save as Favorite" aria-label="Save as Favorite">
                                     <span class="codicon codicon-heart"></span>
                                 </button>
-                                <button class="icon-btn" id="manage-instruction" title="Manage Favorite">
+                                <button class="icon-btn" id="manage-instruction" data-tooltip="Manage Favorite" aria-label="Manage Favorite">
                                     <span class="codicon codicon-ellipsis"></span>
                                 </button>
                             </div>
@@ -81,15 +81,15 @@ export class WebviewHtmlFactory {
                         <div class="section-header">
                             <div class="section-title-container">
                                 <h3 id="label-files">Workspace Files</h3>
-                                <button class="icon-btn" id="help-files" title="Select the exact files to inject into the LLM context. Keep selections targeted to avoid exceeding token limits.">
+                                <button class="icon-btn" id="help-files" data-tooltip="Select the exact files to inject into the LLM context. Keep selections targeted to avoid exceeding token limits." aria-label="Help: File selection explanation">
                                     <span class="codicon codicon-question"></span>
                                 </button>
                             </div>
                             <div class="header-actions">
-                                <button class="icon-btn" id="selectAll" title="Select All">
+                                <button class="icon-btn" id="selectAll" data-tooltip="Select All" aria-label="Select All Files">
                                     <span class="codicon codicon-check-all"></span>
                                 </button>
-                                <button class="icon-btn" id="deselectAll" title="Deselect All">
+                                <button class="icon-btn" id="deselectAll" data-tooltip="Deselect All" aria-label="Deselect All Files">
                                     <span class="codicon codicon-clear-all"></span>
                                 </button>
                             </div>
@@ -103,17 +103,17 @@ export class WebviewHtmlFactory {
                     <section class="form-section">
                         <div class="section-title-container">
                             <h3 id="label-postPrompt">Post-prompt (Conclusion)</h3>
-                            <button class="icon-btn" id="help-postPrompt" title="Add concluding rules, output format constraints, or specific formatting requirements (e.g., 'Output only valid JSON').">
+                            <button class="icon-btn" id="help-postPrompt" data-tooltip="Add concluding rules, output format constraints, or specific formatting requirements (e.g., 'Output only valid JSON')." aria-label="Help: Post-prompt explanation">
                                 <span class="codicon codicon-question"></span>
                             </button>
                         </div>
                         <div class="header-with-actions">
                             <div class="favorites-list" id="favorites-postPrompt"></div>
                             <div class="favorite-actions">
-                                <button class="icon-btn" id="save-postPrompt" title="Save as Favorite">
+                                <button class="icon-btn" id="save-postPrompt" data-tooltip="Save as Favorite" aria-label="Save as Favorite">
                                     <span class="codicon codicon-heart"></span>
                                 </button>
-                                <button class="icon-btn" id="manage-postPrompt" title="Manage Favorite">
+                                <button class="icon-btn" id="manage-postPrompt" data-tooltip="Manage Favorite" aria-label="Manage Favorite">
                                     <span class="codicon codicon-ellipsis"></span>
                                 </button>
                             </div>

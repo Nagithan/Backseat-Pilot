@@ -179,6 +179,7 @@ describe('PromptSection', () => {
         
         expect(textarea.value).toBe('Original Content');
         expect(chip.classList.contains('active')).toBe(true);
+        expect(chip.dataset.tooltip).toBe('Original Content');
 
         // 2. Modify text
         textarea.value = 'Modified Content';

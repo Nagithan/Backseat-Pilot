@@ -34,7 +34,6 @@ h3 {
     color: var(--vscode-descriptionForeground);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    user-select: none;
 }
 
 .section-title-container {
@@ -109,6 +108,7 @@ button {
 
 .icon-btn .codicon {
     font-size: 14px;
+    pointer-events: none; /* Let the button handle the tooltip */
 }
 
 .main-textarea, .main-input {
@@ -174,20 +174,20 @@ button {
 }
 
 .favorite-chip {
-    display: inline-flex;
-    align-items: center;
     padding: 2px 8px;
+    border-radius: 12px;
     background-color: var(--vscode-badge-background);
     color: var(--vscode-badge-foreground);
-    border-radius: 10px;
-    font-size: 10px;
+    font-size: 11px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    border: none;
+    outline: none;
     max-width: 120px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    user-select: none;
+    display: flex;
+    align-items: center;
 }
 
 .favorite-chip:hover {
@@ -536,5 +536,67 @@ input[type="checkbox"]:indeterminate::after {
     0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.6); }
     70% { box-shadow: 0 0 0 12px rgba(72, 187, 120, 0); }
     100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+}
+
+/* =========================================================
+   ZERO-DEFECT TOOLTIP SYSTEM
+   ========================================================= */
+
+/* 1. Formatting Context Anchor */
+[data-tooltip] {
+    position: relative;
+    cursor: pointer;
+}
+
+/* 2. Tooltip Body Construction */
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    
+    /* Project BELOW the button to prevent Top-Iframe Clipping */
+    top: calc(100% + 8px); 
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* Box Model & Wrapping for narrow VS Code Sidebars */
+    width: max-content;
+    max-width: 220px; 
+    padding: 6px 10px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+    
+    /* Perfect VS Code Theming */
+    background-color: var(--vscode-editorHoverWidget-background);
+    color: var(--vscode-editorHoverWidget-foreground);
+    border: 1px solid var(--vscode-editorHoverWidget-border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--vscode-font-family);
+    box-shadow: 0 4px 8px var(--vscode-widget-shadow);
+    
+    /* Visibility & Animation Engine */
+    z-index: 99999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; /* Crucial: stops hover flickering */
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+}
+
+/* 3. Hover State */
+[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0.3s; /* Standard UX delay to prevent flashes */
+}
+
+/* 4. Boundary Collision Physics */
+/* Right-aligned buttons (Save, Manage, Select All) MUST grow inwards */
+.favorite-actions [data-tooltip]::after,
+.header-actions [data-tooltip]::after {
+    left: auto;
+    right: 0;
+    transform: translateY(0); /* Remove X-axis translation */
 }
 

@@ -101,22 +101,26 @@ export class PromptSection {
 
         this.favoritesContainer.textContent = '';
         favorites.forEach(fav => {
-            const chip = document.createElement('div');
+            const chip = document.createElement('button');
             chip.className = 'favorite-chip';
             
             const isActive = this.selectedPresetId === fav.id;
             const isModified = !isActive && this.lastSelectedPresetId === fav.id && currentText.trim().length > 0;
 
+            let tooltip = fav.content;
             if (isActive) {
                 chip.classList.add('active');
             } else if (isModified) {
                 chip.classList.add('modified');
-                chip.title = 'Content modified - click to save as new favorite';
-            } else {
-                chip.title = fav.content;
+                tooltip = 'Content modified - click to save as new favorite';
             }
 
+            chip.dataset.tooltip = tooltip;
+            chip.setAttribute('aria-label', tooltip);
             chip.textContent = fav.name;
+            
+            this.selectedPresetId = currentText === fav.content ? fav.id : this.selectedPresetId;
+
             chip.onclick = () => {
                 if (isModified) {
                     // Re-clicking while modified asks to save
