@@ -105,22 +105,28 @@ describe('PromptSection', () => {
         expect(textarea.value).toBe('C2');
     });
 
-    it('should render favorite chips and handle clicks', () => {
-        const favorites: Preset[] = [{ id: 'fav1', name: 'Fav 1', content: 'C1', type: 'prePrompt' }];
+    it('should render favorite chips and handle clicks (selection)', () => {
+        const favorites: Preset[] = [
+            { id: 'fav1', name: 'Fav 1', content: 'C1', type: 'prePrompt' },
+            { id: 'fav2', name: 'Fav 2', content: 'C2', type: 'prePrompt' }
+        ];
         stateManager.getState.mockReturnValue({ favorites });
-        section.update('C1', favorites, 'fav1');
+        section.update('', favorites, null); // Start unselected (0 selected because 2 available)
 
         const container = document.getElementById('favorites-prePrompt')!;
         const chip = container.querySelector('.favorite-chip') as HTMLElement;
         expect(chip).toBeTruthy();
-        expect(chip.textContent).toBe('Fav 1');
-        expect(chip.classList.contains('active')).toBe(true);
+        expect(chip.classList.contains('active')).toBe(false);
 
         chip.click();
         expect(ipc.postMessage).toHaveBeenCalledWith({
             type: IpcMessageId.SET_SELECTED_PRESET,
             payload: { id: 'fav1', type: 'prePrompt' }
         });
+        
+        // Re-query because renderFavorites recreates chips
+        const newChip = container.querySelector('.favorite-chip') as HTMLElement;
+        expect(newChip.classList.contains('active')).toBe(true);
     });
     
     it('should NOT auto-select if empty AFTER initialization', () => {
@@ -137,5 +143,27 @@ describe('PromptSection', () => {
         // 3. Subsequent update (should NOT auto-fill)
         section.update('', favorites);
         expect(textarea.value).toBe('');
+    });
+
+    it('should toggle selection: second click clears text and deselects', () => {
+        const favorites: Preset[] = [{ id: 'fav1', name: 'Fav 1', content: 'C1', type: 'prePrompt' }];
+        stateManager.getState.mockReturnValue({ favorites });
+        
+        // Initial setup - select it
+        section.update('', favorites); // Should auto-select first one if empty and uninitialized
+        const container = document.getElementById('favorites-prePrompt')!;
+        const chip = container.querySelector('.favorite-chip') as HTMLElement;
+        const textarea = document.getElementById('prePrompt') as HTMLTextAreaElement;
+        
+        expect(textarea.value).toBe('C1');
+        expect(chip.classList.contains('active')).toBe(true);
+
+        // First manual click (already selected, so it should toggle OFF)
+        chip.click();
+        expect(textarea.value).toBe('');
+        expect(ipc.postMessage).toHaveBeenCalledWith(expect.objectContaining({
+            type: IpcMessageId.SET_SELECTED_PRESET,
+            payload: { type: 'prePrompt', id: null }
+        }));
     });
 });

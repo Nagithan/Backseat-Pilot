@@ -102,15 +102,19 @@ export class PromptSection {
             chip.title = fav.content;
             chip.textContent = fav.name;
             chip.onclick = () => {
-                this.textarea.value = fav.content;
-                this.selectedPresetId = fav.id;
-                this.stateManager.updateState({ [this.type]: fav.content });
+                const isActive = this.selectedPresetId === fav.id;
+                const newText = isActive ? '' : fav.content;
+                const newId = isActive ? null : fav.id;
+
+                this.textarea.value = newText;
+                this.selectedPresetId = newId;
+                this.stateManager.updateState({ [this.type]: newText });
                 
                 if (this.type === 'prePrompt' || this.type === 'postPrompt') {
-                    this.ipc.postMessage({ type: IpcMessageId.SET_SELECTED_PRESET, payload: { type: this.type, id: fav.id } });
+                    this.ipc.postMessage({ type: IpcMessageId.SET_SELECTED_PRESET, payload: { type: this.type, id: newId } });
                 }
 
-                this.ipc.postMessage({ type: IpcMessageId.UPDATE_TEXT, payload: { type: this.type, text: fav.content } });
+                this.ipc.postMessage({ type: IpcMessageId.UPDATE_TEXT, payload: { type: this.type, text: newText } });
                 this.adjustHeight();
                 this.renderFavorites();
             };
