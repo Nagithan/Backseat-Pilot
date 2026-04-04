@@ -9,12 +9,12 @@
   </p>
 </div>
 
-**LLM Babysitter** is a VS Code / Google Antigravity extension that helps you copy-paste structured prompts for web-based LLMs, with pre-prompt, instructions and files context.
-
 [![VS Code Version](https://img.shields.io/visual-studio-marketplace/v/nagithan.llm-babysitter?label=VS%20Code&style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nagithan.llm-babysitter)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/nagithan/llm-babysitter?label=Open%20VSX&style=flat-square)](https://open-vsx.org/extension/nagithan/llm-babysitter)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/Nagithan/LLM-Babysitter/release.yml?label=Build&style=flat-square)](https://github.com/Nagithan/LLM-Babysitter/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
+**LLM Babysitter** is a VS Code / Google Antigravity extension that helps you copy-paste structured prompts for web-based LLMs, with pre-prompt, instructions and files context.
 
 ---
 
@@ -23,8 +23,6 @@
 - [🔧 How to Install](#-how-to-install)
 - [🚀 How to Use](#-how-to-use-llm-babysitter)
 - [🛡️ Privacy & Performance](#️-privacy--performance)
-
----
 
 ## ✨ Features
 
@@ -52,8 +50,6 @@ Get the best results from LLMs with curated templates:
 
 ### 📊 Real-time Token Metrics
 - Token counting with color-coding helps you stay within your model's context limits.
-
----
 
 ## 🔧 How to install
 
@@ -90,8 +86,6 @@ The extension is available on [VS Code Marketplace](https://marketplace.visualst
 6. Go to your web version of your favorite LLM and paste the prompt !
 7. With the default `Final instructions`, the web based LLM will generate a prompt ready to be pasted into an AI assistant IDE (Antigravity, Copilot, etc).
 
----
-
 ## 🛡️ Privacy & Performance
 
 - **🔒 Local Only**: Everything happens locally on your machine.
@@ -99,8 +93,6 @@ The extension is available on [VS Code Marketplace](https://marketplace.visualst
 - **🚫 No Telemetry**: It does not collect any data.
 - **⚡ Efficient**: Optimized for large projects and complex file structures.
 - **📦 Lightweight**: No external dependencies required.
-
----
 
 ### ⚙️ Exclude Settings
 Exclude files from the babysitter explorer via right click on the file in the explorer or via `settings.json`:
