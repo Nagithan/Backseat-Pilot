@@ -13,7 +13,6 @@
 
 [![VS Code Version](https://img.shields.io/visual-studio-marketplace/v/nagithan.llm-babysitter?label=VS%20Code&style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nagithan.llm-babysitter)
 [![Open VSX Version](https://img.shields.io/open-vsx/v/nagithan/llm-babysitter?label=Open%20VSX&style=flat-square)](https://open-vsx.org/extension/nagithan/llm-babysitter)
-[![Downloads](https://img.shields.io/visual-studio-marketplace/d/nagithan.llm-babysitter?label=Downloads&style=flat-square)](https://marketplace.visualstudio.com/items?itemName=nagithan.llm-babysitter)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/Nagithan/LLM-Babysitter/release.yml?label=Build&style=flat-square)](https://github.com/Nagithan/LLM-Babysitter/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
