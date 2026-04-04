@@ -122,4 +122,20 @@ describe('PromptSection', () => {
             payload: { id: 'fav1', type: 'prePrompt' }
         });
     });
+    
+    it('should NOT auto-select if empty AFTER initialization', () => {
+        const favorites: Preset[] = [{ id: 'fav1', name: 'Fav 1', content: 'Auto Content', type: 'prePrompt' }];
+        const textarea = document.getElementById('prePrompt') as HTMLTextAreaElement;
+        
+        // 1. Initial update (should auto-fill)
+        section.update('', favorites);
+        expect(textarea.value).toBe('Auto Content');
+        
+        // 2. Clear manually (simulate user clearing)
+        textarea.value = '';
+        
+        // 3. Subsequent update (should NOT auto-fill)
+        section.update('', favorites);
+        expect(textarea.value).toBe('');
+    });
 });

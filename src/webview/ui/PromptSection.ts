@@ -8,6 +8,7 @@ export class PromptSection {
     private saveBtn: HTMLButtonElement;
     private manageBtn: HTMLButtonElement;
     private selectedPresetId: string | null = null;
+    private isInitialized = false;
 
     constructor(
         private type: 'prePrompt' | 'instruction' | 'postPrompt',
@@ -61,8 +62,8 @@ export class PromptSection {
             this.selectedPresetId = lastId;
         }
 
-        // Auto-select logic if empty
-        if (!this.textarea.value.trim()) {
+        // Auto-select logic if empty - ONLY on initial load
+        if (!this.isInitialized && !this.textarea.value.trim()) {
             const typeFavs = favorites.filter(f => f.type === this.type);
             if (this.selectedPresetId) {
                 const saved = typeFavs.find(f => f.id === this.selectedPresetId);
@@ -77,6 +78,7 @@ export class PromptSection {
             }
         }
 
+        this.isInitialized = true;
         this.renderFavorites();
     }
 
