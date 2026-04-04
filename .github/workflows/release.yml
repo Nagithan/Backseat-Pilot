@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'package.json'
+  workflow_dispatch:
 
 jobs:
   release:
@@ -23,6 +24,7 @@ jobs:
         run: |
           # Get version from the current package.json
           NEW_VERSION=$(jq -r .version package.json)
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           
           # Find the latest tag. If no tags exist yet (first run), default to empty string.
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -35,32 +37,35 @@ jobs:
           
           if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup Node.js
-        if: steps.check_version.outputs.changed == 'true'
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
-        if: steps.check_version.outputs.changed == 'true'
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: npm ci
 
+      - name: Run unit tests
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: npm run test:unit
+
       - name: Build production bundle
-        if: steps.check_version.outputs.changed == 'true'
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: npm run package
 
       - name: Package extension (.vsix)
-        if: steps.check_version.outputs.changed == 'true'
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: npx @vscode/vsce package -o backseat-pilot-${{ steps.check_version.outputs.version }}.vsix
 
       - name: Create GitHub Release
-        if: steps.check_version.outputs.changed == 'true'
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -79,3 +84,15 @@ jobs:
             --title "Release $TAG" \
             --notes-file RELEASE_NOTES.md \
             backseat-pilot-$VERSION.vsix
+
+      - name: Publish to Microsoft VS Code Marketplace
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx @vscode/vsce publish --pat $VSCE_PAT
+
+      - name: Publish to Open VSX Registry
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: npx ovsx publish backseat-pilot-${{ steps.check_version.outputs.version }}.vsix --pat $OVSX_PAT
