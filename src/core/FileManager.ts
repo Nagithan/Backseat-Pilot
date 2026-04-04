@@ -64,7 +64,7 @@ export class FileManager {
         relativePath: folder.name,
         isDirectory: true,
         hasSubdirectories: true, // Optimistically true for roots
-        children: []
+        children: undefined
       });
     }
     return roots;
@@ -119,7 +119,7 @@ export class FileManager {
             // We assume directories have subdirectories to enable UI chevrons.
             // Lazy loading will handle the "empty directory" case gracefully.
             hasSubdirectories: isDirectory,
-            children: isDirectory ? [] : undefined
+            children: undefined // Start as undefined to distinguish from empty results ([])
           } as FileNode;
         })
         .filter((c): c is FileNode => c !== null);

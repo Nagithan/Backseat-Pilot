@@ -100,9 +100,17 @@ export class FileTreeRenderer {
         item.style.display = shouldShow ? '' : 'none';
         if (!shouldShow) { return false; }
 
-        // In filter mode, always show children; otherwise respect expandedPaths
         const isExpanded = isFilterMode ? anyChildMatches || selfMatches : this.expandedPaths.has(node.relativePath);
         item.classList.toggle('expanded', isExpanded);
+
+        const isLoaded = node.children !== undefined;
+        const isEffectivelyEmpty = node.isDirectory && !anyChildMatches;
+        // A directory is disabled if it's expanded and shows no items, or if it was loaded and is truly empty
+        const isDisabled = isEffectivelyEmpty && (isExpanded || (isLoaded && node.children!.length === 0));
+        
+        if (isDisabled) {
+            header.classList.add('disabled');
+        }
 
         (item as any).dataset.path = node.relativePath;
 
@@ -114,6 +122,7 @@ export class FileTreeRenderer {
             chevron.style.marginRight = '2px';
             chevron.onclick = (e) => {
                 e.stopPropagation();
+                if (isDisabled && !isExpanded) return; // Don't try to expand if we know it's empty and collapsed (shouldn't happen with chevron logic)
                 this.toggleNode(node, item!, chevron);
             };
             header.appendChild(chevron);
@@ -129,8 +138,10 @@ export class FileTreeRenderer {
         checkbox.type = 'checkbox';
         checkbox.checked = selectState.checked;
         checkbox.indeterminate = selectState.indeterminate;
+        checkbox.disabled = isDisabled;
         checkbox.onclick = (e) => e.stopPropagation();
         checkbox.onchange = (e) => {
+            if (isDisabled) return;
             const target = e.target as HTMLInputElement;
             this.handleToggle(node, target.checked);
         };
@@ -140,7 +151,7 @@ export class FileTreeRenderer {
         const icon = document.createElement('span');
         icon.className = `codicon codicon-${this.getFileIcon(node)}`;
         icon.style.fontSize = '14px';
-        icon.style.color = this.getIconColor(node);
+        icon.style.color = isDisabled ? 'var(--vscode-disabledForeground)' : this.getIconColor(node);
         header.appendChild(icon);
 
         // Label (XSS SAFE HIGHLIGHTING)
@@ -164,6 +175,7 @@ export class FileTreeRenderer {
         header.appendChild(label);
 
         header.onclick = () => {
+            if (isDisabled) return;
             if (node.isDirectory) {
                 const chevron = header.querySelector('.codicon') as HTMLElement;
                 this.toggleNode(node, item!, chevron);

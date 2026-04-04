@@ -237,6 +237,17 @@ button {
     background-color: var(--vscode-list-hoverBackground);
 }
 
+.item-header.disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none; /* Disable all interactions including checkbox */
+    filter: grayscale(100%);
+}
+
+.item-header.disabled:hover {
+    background-color: transparent;
+}
+
 .item-label {
     font-size: 12px;
     white-space: nowrap;

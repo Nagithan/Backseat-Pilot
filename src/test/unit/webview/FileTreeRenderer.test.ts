@@ -68,7 +68,7 @@ describe('FileTreeRenderer Webview Unit Tests', () => {
 
     it('should handle node expansion and trigger IPC', () => {
         const roots: FileNode[] = [
-            { name: 'folder', relativePath: 'folder', isDirectory: true, children: [] }
+            { name: 'folder', relativePath: 'folder', isDirectory: true, children: undefined }
         ];
 
         renderer.render(roots);
@@ -153,7 +153,7 @@ describe('FileTreeRenderer Webview Unit Tests', () => {
 
     it('should handle async folder expansion with lazy-loaded children', async () => {
         const roots: FileNode[] = [
-            { name: 'folder', relativePath: 'folder', isDirectory: true, children: [] }
+            { name: 'folder', relativePath: 'folder', isDirectory: true, children: undefined }
         ];
 
         renderer.render(roots);
@@ -207,8 +207,8 @@ describe('FileTreeRenderer Webview Unit Tests', () => {
 
     it('should handle expand/collapse all signals', () => {
         const roots: FileNode[] = [
-            { name: 'f1', relativePath: 'f1', isDirectory: true, children: [] },
-            { name: 'f2', relativePath: 'f2', isDirectory: true, children: [] }
+            { name: 'f1', relativePath: 'f1', isDirectory: true, children: undefined },
+            { name: 'f2', relativePath: 'f2', isDirectory: true, children: undefined }
         ];
 
         renderer.render(roots);
@@ -223,5 +223,47 @@ describe('FileTreeRenderer Webview Unit Tests', () => {
     it('should render empty state when no roots are provided', () => {
         renderer.render([]);
         expect(container.textContent).toContain('No files found.');
+    });
+
+    it('should gray out and disable empty folders that have been expanded', () => {
+        const roots: FileNode[] = [
+            { name: 'empty', relativePath: 'empty', isDirectory: true, children: [] }
+        ];
+
+        renderer.render(roots);
+        const item = container.querySelector('.file-tree-item') as HTMLElement;
+        const header = item.querySelector('.item-header') as HTMLElement;
+        const checkbox = header.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+        // Note: we can't click chevron if it's not expanded and we know it's empty?
+        // Actually, roots start collapsed. If children is [], it's already "loaded".
+        // In renderNode: isExpanded = false.
+        // isDisabled = (isDirectory && !anyChildMatches) && (isExpanded || (isLoaded && children.length === 0))
+        // Since isLoaded=true and children.length=0, isDisabled is true even when collapsed!
+        
+        expect(header.classList.contains('disabled')).toBe(true);
+        expect(checkbox.disabled).toBe(true);
+        
+        // Clicking should be blocked by our logic
+        header.click();
+        expect(item.classList.contains('expanded')).toBe(false);
+    });
+
+    it('should gray out folders that appear empty due to filtering', () => {
+        const roots: FileNode[] = [
+            { name: 'folder', relativePath: 'folder', isDirectory: true, children: [
+                { name: 'hidden.ts', relativePath: 'folder/hidden.ts', isDirectory: false }
+            ]}
+        ];
+
+        renderer.render(roots);
+        renderer.setFilter('folder'); // Parent matches, children don't
+
+        const header = container.querySelector('.item-header') as HTMLElement;
+        const checkbox = header.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+        // folder matches but its children don't, so it's effectively empty in UI
+        expect(header.classList.contains('disabled')).toBe(true);
+        expect(checkbox.disabled).toBe(true);
     });
 });

@@ -61,6 +61,7 @@ describe('FileManager Unit Tests', () => {
             expect(children.length).toBe(3);
             expect(children[0].name).toBe('subdir');
             expect(children[0].isDirectory).toBe(true);
+            expect(children[0].children).toBeUndefined(); // Verify fix
             expect(children[1].name).toBe('another_file.ts');
             expect(children[2].name).toBe('file.ts');
         });

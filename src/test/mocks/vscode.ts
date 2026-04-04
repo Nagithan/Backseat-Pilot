@@ -73,6 +73,24 @@ export class Uri {
 
 const mockFs = new Map<string, MockFsEntry>();
 
+export class EventEmitter<T = any> {
+    event = vi.fn();
+    fire = vi.fn();
+    dispose = vi.fn();
+}
+
+export class FileSystemError extends Error {
+    constructor(message?: string) {
+        super(message);
+        this.name = 'FileSystemError';
+    }
+    static FileNotFound(message?: string) {
+        const err = new FileSystemError(message);
+        (err as any).code = 'FileNotFound';
+        return err;
+    }
+}
+
 // Internal implementations to avoid recursion during spying
 const fsImpl = {
     stat: async (uri: Uri) => {
@@ -87,11 +105,11 @@ const fsImpl = {
                 return { type: FileType.Directory, size: 0, ctime: 0, mtime: 0 };
             }
         }
-        throw new Error(`File not found: ${uri.fsPath}`);
+        throw FileSystemError.FileNotFound(`File not found: ${uri.fsPath}`);
     },
     readFile: async (uri: Uri) => {
         const entry = mockFs.get(uri.fsPath);
-        if (!entry || !entry.content) { throw new Error(`File not found or is a directory: ${uri.fsPath}`); }
+        if (!entry || !entry.content) { throw FileSystemError.FileNotFound(`File not found: ${uri.fsPath}`); }
         return entry.content;
     },
     readDirectory: async (uri: Uri) => {
@@ -110,7 +128,7 @@ const fsImpl = {
         // Also check for virtual directories (parents of files)
         if (results.length === 0) {
              // Check if it's a known directory via discovery
-             try { await fsImpl.stat(uri); } catch { throw new Error(`Directory not found: ${uri.fsPath}`); }
+             try { await fsImpl.stat(uri); } catch { throw FileSystemError.FileNotFound(`Directory not found: ${uri.fsPath}`); }
         }
         return results;
     },
@@ -227,12 +245,6 @@ export enum TreeItemCollapsibleState {
     Expanded = 2
 }
 
-export class EventEmitter<T = any> {
-    event = vi.fn();
-    fire = vi.fn();
-    dispose = vi.fn();
-}
-
 export default {
     Uri,
     workspace,
@@ -248,4 +260,5 @@ export default {
     CancellationTokenSource,
     TreeItemCollapsibleState,
     EventEmitter,
+    FileSystemError,
 };
