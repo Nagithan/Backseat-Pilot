@@ -32,8 +32,8 @@ export class CopyToClipboardHandler implements IIpcMessageHandler {
                 await vscode.env.clipboard.writeText(prompt);
 
                 this.webview.sendStatus('success', LocaleManager.getTranslation('status.copied'));
-            } catch (error: any) {
-                this.logger.error(`Generation failed: ${error.message}`);
+            } catch (error: unknown) {
+                this.logger.error(`Generation failed: ${error instanceof Error ? error.message : String(error)}`);
                 this.webview.sendStatus('error', 'Prompt generation failed.');
             }
         }

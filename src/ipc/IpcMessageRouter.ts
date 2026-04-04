@@ -27,9 +27,9 @@ export class IpcMessageRouter {
         if (handler) {
             try {
                 await handler.execute(message);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // High-level boundary for handler failures
-                throw new Error(`Handler [${message.type}] execution failed: ${error.message}`);
+                throw new Error(`Handler [${message.type}] execution failed: ${error instanceof Error ? error.message : String(error)}`);
             }
         } else {
             // Implicit failure for unregistered messages to avoid silent drops

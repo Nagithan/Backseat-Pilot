@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AppState, WebviewMessage, ExtensionMessage, FileNode, Preset, IpcMessageId } from '../types/index.js';
+import { AppState, WebviewMessage, ExtensionMessage, FileNode, IpcMessageId } from '../types/index.js';
 import { LocaleManager } from '../i18n/LocaleManager.js';
 import { FileManager } from '../core/FileManager.js';
 import { PresetManager } from '../core/PresetManager.js';
@@ -67,7 +67,7 @@ export class LLMBabysitterViewProvider implements vscode.WebviewViewProvider, IW
      */
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
+        _context: vscode.WebviewViewResolveContext,
         _token: vscode.CancellationToken,
     ): void {
         this._view = webviewView;
@@ -95,9 +95,9 @@ export class LLMBabysitterViewProvider implements vscode.WebviewViewProvider, IW
                     await this.presetManager.load();
                 }
                 await this.ipcRouter.handleMessage(data);
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // The AI is having a tantrum
-                this.logger.error(`Babysitting Error: ${error.message}`);
+                this.logger.error(`Babysitting Error: ${error instanceof Error ? error.message : String(error)}`);
                 this.sendStatus('error', LocaleManager.getTranslation('status.error'));
             }
         });

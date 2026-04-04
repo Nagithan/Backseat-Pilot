@@ -12,8 +12,13 @@ export class CopyToClipboardRawHandler implements IIpcMessageHandler {
 
     async execute(message: WebviewMessage) {
         if (message.type === IpcMessageId.COPY_TO_CLIPBOARD_RAW) {
-            await vscode.env.clipboard.writeText(message.payload);
-            this.webview.sendStatus('success', LocaleManager.getTranslation('status.copied'));
+            try {
+                await vscode.env.clipboard.writeText(message.payload);
+                this.webview.sendStatus('success', LocaleManager.getTranslation('status.copied'));
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
+                this.webview.sendStatus('error', `Clipboard access failed: ${message}`);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { vi } from 'vitest';
+import { MockWorkspace } from './mocks/vscode.js';
 
 /**
  * Shared utilities for unit tests to reduce boilerplate and improve readability.
@@ -9,7 +10,7 @@ export class TestUtils {
    * Sets up mock workspace folders in the VS Code mock.
    */
   static setupWorkspaceFolders(folders: { name: string; path: string }[]) {
-    (vscode.workspace as any).workspaceFolders = folders.map((f, index) => ({
+    (vscode.workspace as unknown as MockWorkspace).workspaceFolders = folders.map((f, index) => ({
       uri: vscode.Uri.file(f.path),
       name: f.name,
       index
@@ -20,7 +21,7 @@ export class TestUtils {
    * Clears the mock workspace folders.
    */
   static clearWorkspaceFolders() {
-    (vscode.workspace as any).workspaceFolders = undefined;
+    (vscode.workspace as unknown as MockWorkspace).workspaceFolders = [];
   }
 
   /**
@@ -31,8 +32,8 @@ export class TestUtils {
     vi.resetAllMocks();
     
     // Explicitly reset the implementations of our custom mocks to their defaults
-    const ws = vscode.workspace as any;
-    const fsImpl = ws.getFsImpl?.();
+    const ws = vscode.workspace as unknown as MockWorkspace;
+    const fsImpl = ws.getFsImpl();
     if (fsImpl) {
         vi.mocked(vscode.workspace.fs.stat).mockImplementation(fsImpl.stat);
         vi.mocked(vscode.workspace.fs.readFile).mockImplementation(fsImpl.readFile);
@@ -53,7 +54,7 @@ export class TestUtils {
    */
   static deferred<T>() {
     let resolve!: (value: T | PromiseLike<T>) => void;
-    let reject!: (reason?: any) => void;
+    let reject!: (reason?: unknown) => void;
     const promise = new Promise<T>((res, rej) => {
       resolve = res;
       reject = rej;
@@ -61,3 +62,7 @@ export class TestUtils {
     return { promise, resolve, reject };
   }
 }
+
+export type DeepPartial<T> = T extends object ? {
+    [P in keyof T]?: DeepPartial<T[P]>;
+} : T;

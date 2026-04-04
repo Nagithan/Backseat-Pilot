@@ -8,7 +8,7 @@ import { IIpcMessageHandler } from './IpcHandler.js';
  * outgoing webview signals are accounted for.
  */
 export class UpdateTextHandler implements IIpcMessageHandler {
-    execute(message: WebviewMessage): void {
+    execute(_message: WebviewMessage): void {
         // No-op: Host-side tracking not required for stateless prompt generation.
     }
 }

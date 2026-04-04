@@ -1,4 +1,4 @@
-import { vi, Mock } from 'vitest';
+import { vi } from 'vitest';
 
 /**
  * Robust mock for the VS Code API.
@@ -73,20 +73,21 @@ export class Uri {
 
 const mockFs = new Map<string, MockFsEntry>();
 
-export class EventEmitter<T = any> {
+export class EventEmitter<T = unknown> {
     event = vi.fn();
-    fire = vi.fn();
+    fire = vi.fn((_data?: T) => {});
     dispose = vi.fn();
 }
 
 export class FileSystemError extends Error {
+    public code?: string;
     constructor(message?: string) {
         super(message);
         this.name = 'FileSystemError';
     }
     static FileNotFound(message?: string) {
         const err = new FileSystemError(message);
-        (err as any).code = 'FileNotFound';
+        err.code = 'FileNotFound';
         return err;
     }
 }
@@ -138,15 +139,37 @@ const fsImpl = {
     createDirectory: async (uri: Uri) => {
         mockFs.set(uri.fsPath, { type: FileType.Directory });
     },
-    delete: async (uri: Uri) => {
+    delete: async (uri: Uri, _options?: { recursive?: boolean; useTrash?: boolean }) => {
         mockFs.delete(uri.fsPath);
     }
 };
 
-export const workspace = {
-    workspaceFolders: [] as any[],
+export interface MockWorkspace {
+    workspaceFolders: { uri: Uri; name: string; index: number }[];
+    getConfiguration: ReturnType<typeof vi.fn>;
+    fs: {
+        stat: ReturnType<typeof vi.fn>;
+        readFile: ReturnType<typeof vi.fn>;
+        readDirectory: ReturnType<typeof vi.fn>;
+        writeFile: ReturnType<typeof vi.fn>;
+        delete: ReturnType<typeof vi.fn>;
+        rename: ReturnType<typeof vi.fn>;
+        copy: ReturnType<typeof vi.fn>;
+        createDirectory: ReturnType<typeof vi.fn>;
+    };
+    onDidChangeConfiguration: ReturnType<typeof vi.fn>;
+    onDidSaveTextDocument: ReturnType<typeof vi.fn>;
+    getWorkspaceFolder: ReturnType<typeof vi.fn>;
+    asRelativePath: ReturnType<typeof vi.fn>;
+    resetMockFs: () => void;
+    setMockFile: (path: string, content: string | Uint8Array) => void;
+    getFsImpl: () => typeof fsImpl;
+}
+
+export const workspace: MockWorkspace = {
+    workspaceFolders: [] as { uri: Uri; name: string; index: number }[],
     getConfiguration: vi.fn(() => ({
-        get: vi.fn((key: string) => undefined),
+        get: vi.fn((_key: string) => undefined),
         update: vi.fn(),
         has: vi.fn(),
         inspect: vi.fn(),
@@ -164,10 +187,10 @@ export const workspace = {
     onDidChangeConfiguration: vi.fn(() => ({ dispose: vi.fn() })),
     onDidSaveTextDocument: vi.fn(() => ({ dispose: vi.fn() })),
     getWorkspaceFolder: vi.fn((uri: Uri) => {
-        return workspace.workspaceFolders.find(f => uri.fsPath.startsWith(f.uri.fsPath));
+        return (workspace as MockWorkspace).workspaceFolders.find(f => uri.fsPath.startsWith(f.uri.fsPath));
     }),
     asRelativePath: vi.fn((uri: Uri, includeWorkspaceFolder?: boolean) => {
-        const folders = workspace.workspaceFolders || [];
+        const folders = (workspace as MockWorkspace).workspaceFolders || [];
         const folder = folders.find(f => uri.fsPath.startsWith(f.uri.fsPath));
         if (!folder) { return uri.fsPath; }
         let rel = uri.fsPath.slice(folder.uri.fsPath.length);
@@ -202,9 +225,11 @@ export const window = {
         error: vi.fn(),
         debug: vi.fn(),
         trace: vi.fn(),
+        replace: vi.fn(),
+        append: vi.fn()
     })),
-    activeTextEditor: undefined as any,
-    visibleTextEditors: [] as any[],
+    activeTextEditor: undefined as unknown,
+    visibleTextEditors: [] as unknown[],
     onDidChangeActiveTextEditor: vi.fn(() => ({ dispose: vi.fn() })),
     registerWebviewViewProvider: vi.fn(() => ({ dispose: vi.fn() })),
 };

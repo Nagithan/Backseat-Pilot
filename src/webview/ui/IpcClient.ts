@@ -1,6 +1,6 @@
-import { WebviewMessage, ExtensionMessage, IpcMessageId, AppState } from "../../types/index.js";
+import { WebviewMessage, IpcMessageId, AppState, ExtensionMessage } from "../../types/index.js";
 
-declare function acquireVsCodeApi<T = any>(): {
+declare function acquireVsCodeApi<T = unknown>(): {
     postMessage(message: WebviewMessage): void;
     getState(): T;
     setState(data: T): void;
@@ -21,7 +21,7 @@ export class IpcClient {
         this.vscode.setState(state);
     }
 
-    public onMessage(callback: (message: any) => void): void {
+    public onMessage(callback: (message: ExtensionMessage) => void): void {
         window.addEventListener('message', (event) => callback(event.data));
     }
 

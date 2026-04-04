@@ -75,7 +75,7 @@ export class FileTreeRenderer {
         const selfMatches = !filter || node.name.toLowerCase().includes(filter);
         const isFilterMode = filter.length > 0;
         
-        let item = document.createElement('div');
+        const item = document.createElement('div');
         item.className = 'file-tree-item';
         this.nodeDomMap.set(node.relativePath, item);
 
@@ -112,7 +112,7 @@ export class FileTreeRenderer {
             header.classList.add('disabled');
         }
 
-        (item as any).dataset.path = node.relativePath;
+        item.dataset.path = node.relativePath;
 
         // Chevron
         if (node.isDirectory) {
@@ -122,7 +122,7 @@ export class FileTreeRenderer {
             chevron.style.marginRight = '2px';
             chevron.onclick = (e) => {
                 e.stopPropagation();
-                if (isDisabled && !isExpanded) return; // Don't try to expand if we know it's empty and collapsed (shouldn't happen with chevron logic)
+                if (isDisabled && !isExpanded) {return;} // Don't try to expand if we know it's empty and collapsed (shouldn't happen with chevron logic)
                 this.toggleNode(node, item!, chevron);
             };
             header.appendChild(chevron);
@@ -141,7 +141,7 @@ export class FileTreeRenderer {
         checkbox.disabled = isDisabled;
         checkbox.onclick = (e) => e.stopPropagation();
         checkbox.onchange = (e) => {
-            if (isDisabled) return;
+            if (isDisabled) {return;}
             const target = e.target as HTMLInputElement;
             this.handleToggle(node, target.checked);
         };
@@ -175,7 +175,7 @@ export class FileTreeRenderer {
         header.appendChild(label);
 
         header.onclick = () => {
-            if (isDisabled) return;
+            if (isDisabled) {return;}
             if (node.isDirectory) {
                 const chevron = header.querySelector('.codicon') as HTMLElement;
                 this.toggleNode(node, item!, chevron);

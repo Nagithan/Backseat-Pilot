@@ -34,7 +34,7 @@ export class PromptSection {
         this.saveBtn.onclick = () => {
             const content = this.textarea.value;
             if (content.trim()) {
-                (window as any).showFavoriteModal(this.type, content);
+                (window as unknown as { showFavoriteModal: (type: string, content: string) => void }).showFavoriteModal(this.type, content);
             }
         };
 

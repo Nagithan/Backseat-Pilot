@@ -19,6 +19,7 @@ export class DeletePresetHandler implements IIpcMessageHandler {
         if (message.type === IpcMessageId.DELETE_PRESET) {
             await this.presetManager.deletePreset(message.payload);
             this.logger.info(`Preset deleted: ${message.payload}`);
+            this.webview.sendStatus('success', 'Favorite deleted successfully.');
             await this.webview.sendInitialState();
         }
     }

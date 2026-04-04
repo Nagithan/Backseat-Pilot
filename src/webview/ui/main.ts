@@ -1,4 +1,4 @@
-import { AppState, WebviewMessage, ExtensionMessage, FileNode, IpcMessageId } from "../../types/index.js";
+import { ExtensionMessage, FileNode, IpcMessageId, AppState } from "../../types/index.js";
 import { IpcClient } from "./IpcClient.js";
 import { StateManager } from "./StateManager.js";
 import { FileTreeRenderer } from "./FileTreeRenderer.js";
@@ -11,7 +11,7 @@ class LLMBabysitterUI {
     private fileTreeRenderer: FileTreeRenderer;
     private sections: Record<string, PromptSection> = {};
     
-    private debouncedSearch: any = null;
+    private debouncedSearch: ReturnType<typeof setTimeout> | null = null;
 
     constructor() {
         this.fileTreeRenderer = new FileTreeRenderer(
@@ -39,7 +39,7 @@ class LLMBabysitterUI {
                     // Full reset: clear expanded state to prevent stale tree display
                     this.fileTreeRenderer.resetExpandedPaths();
                     this.stateManager.setFileTree(message.payload.fileTree);
-                    const { fileTree, ...rest } = message.payload;
+                    const { fileTree: _, ...rest } = message.payload;
                     this.stateManager.updateState(rest);
                     break;
                 case 'stateUpdate':
@@ -77,7 +77,7 @@ class LLMBabysitterUI {
         document.getElementById('copy-clipboard')?.addEventListener('click', () => this.handleCopy());
         
         // Global Modal Logic (simplified)
-        (window as any).showFavoriteModal = (type: string, content: string) => {
+        (window as unknown as { showFavoriteModal: (type: string, content: string) => void }).showFavoriteModal = (type: string, content: string) => {
             const modal = document.getElementById('favorite-modal')!;
             modal.classList.add('visible');
             const input = document.getElementById('favorite-name') as HTMLInputElement;
@@ -90,7 +90,7 @@ class LLMBabysitterUI {
                 if (name) {
                     this.ipc.postMessage({ 
                         type: IpcMessageId.SAVE_PRESET, 
-                        payload: { id: Date.now().toString(), name, content, type: type as any } 
+                        payload: { id: Date.now().toString(), name, content, type: type as 'prePrompt' | 'instruction' | 'postPrompt' } 
                     });
                     modal.classList.remove('visible');
                 }
@@ -113,7 +113,7 @@ class LLMBabysitterUI {
             const label = document.getElementById(`label-${type}`);
             if (label && t[`section.${type}`]) { label.textContent = t[`section.${type}`]; }
             this.sections[type].update(
-                (state as any)[type], 
+                state[type as keyof AppState] as string, 
                 state.favorites, 
                 type === 'prePrompt' ? state.lastPrePromptId : (type === 'postPrompt' ? state.lastPostPromptId : undefined)
             );

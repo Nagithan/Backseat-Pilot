@@ -4,7 +4,7 @@
  * in file-based storage systems where read-modify-write cycles must be atomic.
  */
 export class AsyncQueue {
-    private queue: Promise<any> = Promise.resolve();
+    private queue: Promise<unknown> = Promise.resolve();
 
     /**
      * Enqueues a task and returns a promise that resolves when the task is complete.

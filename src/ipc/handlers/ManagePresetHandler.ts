@@ -19,7 +19,7 @@ export class ManagePresetHandler implements IIpcMessageHandler {
 
     async execute(message: WebviewMessage) {
         if (message.type === IpcMessageId.MANAGE_PRESET) {
-            const { id, type, currentText } = message.payload;
+            const { id, currentText } = message.payload;
             const presets = this.presetManager.getPresets();
             const preset = presets.find(p => p.id === id);
             

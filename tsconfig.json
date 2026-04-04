@@ -13,10 +13,12 @@
 		"moduleResolution": "Bundler",
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
-		"types": ["vitest/globals"]
+		"types": [
+			"vitest/globals"
+		]
 	},
 	"include": [
-		"src/**/*.ts",
+		"src",
 		"vitest.config.ts",
 		".vscode-test.mjs"
 	],

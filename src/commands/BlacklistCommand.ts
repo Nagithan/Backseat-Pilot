@@ -57,8 +57,8 @@ export class BlacklistCommand {
                 vscode.window.showInformationMessage(`Added to LLM Babysitter blacklist: ${relativePath}`);
                 provider.refresh();
             }
-        } catch (error: any) {
-            this.logger.error(`Failed to stat URI ${uri.fsPath}: ${error.message}`);
+        } catch (error: unknown) {
+            this.logger.error(`Failed to stat URI ${uri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
             vscode.window.showErrorMessage(`Blacklist failed: Could not access file system.`);
         }
     }

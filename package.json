@@ -103,7 +103,7 @@
     "watch:tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src vitest.config.ts esbuild.js",
     "test": "npm run test:unit && npm run compile-tests && npm run test:integration",
     "test:integration": "vscode-test",
     "test:unit": "vitest run",

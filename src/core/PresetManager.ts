@@ -42,8 +42,8 @@ export class PresetManager {
         // Clean up legacy state
         await this.context.globalState.update(PresetManager.PRESETS_KEY, undefined);
         Logger.getInstance().info('Successfully migrated user presets to disk storage.');
-      } catch (error: any) {
-        Logger.getInstance().error(`Migration failed: ${error.message}`);
+      } catch (error: unknown) {
+        Logger.getInstance().error(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     });
   }
@@ -62,7 +62,7 @@ export class PresetManager {
       const validated = json.filter(p => p && typeof p === 'object' && p.id && p.name && p.content && p.type);
       this.userPresetsCache = validated;
       return validated;
-    } catch (error) {
+    } catch {
       // If file not found or corrupted, start fresh
       this.userPresetsCache = [];
       return [];
@@ -76,8 +76,8 @@ export class PresetManager {
       const data = Buffer.from(JSON.stringify(presets, null, 2));
       await vscode.workspace.fs.writeFile(fileUri, data);
       this.userPresetsCache = presets;
-    } catch (error: any) {
-      Logger.getInstance().error(`Failed to write presets to disk: ${error.message}`);
+    } catch (error: unknown) {
+      Logger.getInstance().error(`Failed to write presets to disk: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }

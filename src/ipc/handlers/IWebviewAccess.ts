@@ -1,3 +1,4 @@
+import { ExtensionMessage } from '../../types/index.js';
 
 /**
  * Interface abstraction for the Webview Provider.
@@ -28,5 +29,5 @@ export interface IWebviewAccess {
     /**
      * Dispatches a raw message to the webview.
      */
-    postMessage(message: any): void;
+    postMessage(message: ExtensionMessage): void;
 }

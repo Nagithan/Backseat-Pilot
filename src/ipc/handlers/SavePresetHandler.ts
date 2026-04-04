@@ -19,6 +19,7 @@ export class SavePresetHandler implements IIpcMessageHandler {
         if (message.type === IpcMessageId.SAVE_PRESET) {
             await this.presetManager.savePreset(message.payload);
             this.logger.info(`Preset saved: ${message.payload.name}`);
+            this.webview.sendStatus('success', 'Favorite saved successfully.');
             await this.webview.sendInitialState();
         }
     }

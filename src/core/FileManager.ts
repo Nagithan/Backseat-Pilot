@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import ignore, { Ignore } from 'ignore';
+import ignore from 'ignore';
 import { Logger } from './Logger.js';
 import { BinaryDetector } from './BinaryDetector.js';
 

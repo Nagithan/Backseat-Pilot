@@ -20,8 +20,9 @@ export class ExpandFolderHandler implements IIpcMessageHandler {
                     type: 'folderChildren', 
                     payload: { parentPath: folderPath, children } 
                 });
-            } catch (error: any) {
-                this.webview.sendStatus('error', `Failed to expand folder: ${error.message}`);
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
+                this.webview.sendStatus('error', `Failed to expand folder: ${message}`);
                 // Also send empty children to clear the loading state in UI
                 this.webview.postMessage({ 
                     type: 'folderChildren', 
