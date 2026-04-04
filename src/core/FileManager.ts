@@ -104,7 +104,7 @@ export class FileManager {
         .map(([name, type]) => {
           if (name.startsWith('.') && name !== '.github' && name !== '.vscode') { return null; }
 
-          const isDirectory = type === vscode.FileType.Directory;
+          const isDirectory = (type & vscode.FileType.Directory) !== 0;
           const childRelativePath = relativePathInFolder ? `${relativePathInFolder}/${name}` : name;
 
           if (ig.ignores(childRelativePath)) {
@@ -142,7 +142,7 @@ export class FileManager {
       const fileUri = this.resolveDisplayPath(displayPath);
       const stats = await vscode.workspace.fs.stat(fileUri);
 
-      if (stats.type === vscode.FileType.Directory) {
+      if ((stats.type & vscode.FileType.Directory) !== 0) {
         return '[Selected entry is a directory - skipped]';
       }
       if (stats.size > this.MAX_FILE_SIZE) {

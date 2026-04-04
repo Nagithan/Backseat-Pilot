@@ -48,7 +48,7 @@ export class BlacklistCommand {
         
         try {
             const stats = await vscode.workspace.fs.stat(uri);
-            const isDirectory = stats.type === vscode.FileType.Directory;
+            const isDirectory = (stats.type & vscode.FileType.Directory) !== 0;
             const pattern = isDirectory ? `**/${relativePath}/**` : `**/${relativePath}`;
 
             if (!excludes.includes(pattern)) {

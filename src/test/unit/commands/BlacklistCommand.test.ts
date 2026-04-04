@@ -92,6 +92,33 @@ describe('BlacklistCommand Unit Tests', () => {
         );
     });
 
+    it('should correctly identify a symbolic link to a directory using bitwise logic', async () => {
+        const uri = vscode.Uri.file('/workspace/symlink-dir');
+        const mockFolder = { uri: vscode.Uri.file('/workspace'), name: 'workspace', index: 0 };
+        vi.spyOn(vscode.workspace, 'getWorkspaceFolder').mockReturnValue(mockFolder as any);
+        vi.spyOn(vscode.workspace, 'asRelativePath').mockReturnValue('symlink-dir');
+        
+        // Mock fs.stat for a symbolic link to a directory (64 | 2 = 66)
+        vi.spyOn(vscode.workspace.fs, 'stat').mockResolvedValue({ 
+            type: vscode.FileType.SymbolicLink | vscode.FileType.Directory 
+        } as any);
+
+        const mockConfig = {
+            get: vi.fn().mockReturnValue([]),
+            update: vi.fn().mockResolvedValue(undefined)
+        };
+        vi.spyOn(vscode.workspace, 'getConfiguration').mockReturnValue(mockConfig as any);
+
+        await (BlacklistCommand as any).execute(uri, mockProvider);
+
+        // Pattern should be directory-style: **/path/**
+        expect(mockConfig.update).toHaveBeenCalledWith(
+            'excludePatterns', 
+            ['**/symlink-dir/**'], 
+            vscode.ConfigurationTarget.Workspace
+        );
+    });
+
     it('should not add pattern if it already exists', async () => {
         const uri = vscode.Uri.file('/workspace/file.ts');
         const mockFolder = { uri: vscode.Uri.file('/workspace'), name: 'workspace', index: 0 };
