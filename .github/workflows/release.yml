@@ -8,6 +8,10 @@ on:
       - 'package.json'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -19,17 +23,18 @@ jobs:
         with:
           fetch-depth: 0 
 
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Check version change
         id: check_version
         run: |
-          # Get version from the current package.json
           NEW_VERSION=$(jq -r .version package.json)
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           
-          # Find the latest tag. If no tags exist yet (first run), default to empty string.
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
-          # Remove the 'v' prefix from the tag for a clean comparison (e.g., 'v1.0.0' becomes '1.0.0')
           OLD_VERSION=${LATEST_TAG#v}
           
           echo "Current package.json version: $NEW_VERSION"
@@ -52,9 +57,13 @@ jobs:
         if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: npm ci
 
+      - name: Run linter
+        if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: npm run lint --if-present
+
       - name: Run unit tests
         if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
-        run: npm run test:unit
+        run: npm run test:unit --if-present
 
       - name: Build production bundle
         if: steps.check_version.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
@@ -72,10 +81,8 @@ jobs:
           VERSION="${{ steps.check_version.outputs.version }}"
           TAG="v$VERSION"
           
-          # Extract the latest entry from CHANGELOG.md
           sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
           
-          # Fallback if changelog parsing fails or is empty
           if [ ! -s RELEASE_NOTES.md ]; then
             echo "Release $TAG" > RELEASE_NOTES.md
           fi
