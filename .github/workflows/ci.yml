@@ -1,0 +1,46 @@
+name: CI Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test: # C'EST CE NOM QUE L'ON VA UTILISER POUR LE STATUS CHECK
+    name: Run Tests & Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint --if-present
+
+      - name: Run Unit Tests (Vitest)
+        run: npm run test:unit
+
+      - name: Compile Integration Tests
+        run: npm run compile-tests
+
+      - name: Install xvfb (Virtual Display for VS Code)
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Run Integration Tests (VS Code CLI)
+        run: xvfb-run -a npm run test:integration
+
+      - name: Dry Run Build
+        run: npm run package
